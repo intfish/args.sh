@@ -20,6 +20,25 @@ __ARGS_HELP_COMMAND="$0"
 __ARGS_HELP_USAGE=""
 __ARGS_HELP_PS=""
 
+args_reset() {
+    unset __ARGS_PROPERTIES
+    unset __ARGS_POSITIONAL
+    declare -gA __ARGS_PROPERTIES
+    declare -ga __ARGS_POSITIONAL
+
+    __ARGS_DUMP_ARGS=false
+    __ARGS_OPT_PREFIX="opt"
+    __ARGS_POS_PREFIX="arg"
+    __ARGS_COMPLETIONS=""
+    __ARGS_COMPLETIONS_FLAG="-L"
+    __ARGS_LIMIT=0
+
+    __ARGS_HELP_DESCRIPTION=""
+    __ARGS_HELP_COMMAND="$0"
+    __ARGS_HELP_USAGE=""
+    __ARGS_HELP_PS=""
+}
+
 set_description() {
     __ARGS_HELP_DESCRIPTION="$1"
 }
@@ -167,7 +186,7 @@ parse_args() {
                 ;;
         esac
 
-        if [[ "$__ARGS_LIMIT" -gt 0 && "$num_parsed" -eq "$__ARGS_LIMIT" ]]; then
+        if (( __ARGS_LIMIT > 0 && num_parsed >= __ARGS_LIMIT )); then
             break
         fi
     done
@@ -304,7 +323,7 @@ check_builtin() {
                 ;;
         esac
         idx=$(( idx + 1 ))
-        if [[ "$__ARGS_LIMIT" -gt 0 && "$idx" -eq "$__ARGS_LIMIT" ]]; then
+        if (( __ARGS_LIMIT > 0 && idx >= __ARGS_LIMIT )); then
             break
         fi
     done
