@@ -126,6 +126,8 @@ parse_args() {
     positional_idx=0
     while [[ $# -gt 0 ]]; do
         case "$1" in
+            --)
+                break ;;
             -*|--*)
                 key="$1"
                 key_var=$(get_var_name "$key")
