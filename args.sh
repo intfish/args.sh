@@ -13,6 +13,7 @@ __ARGS_OPT_PREFIX="opt"
 __ARGS_POS_PREFIX="arg"
 __ARGS_COMPLETIONS=""
 __ARGS_COMPLETIONS_FLAG="-L"
+__ARGS_LIMIT=0
 
 __ARGS_HELP_DESCRIPTION=""
 __ARGS_HELP_COMMAND="$0"
@@ -45,6 +46,10 @@ set_completions_flag() {
 
 set_completions() {
     __ARGS_COMPLETIONS="$1"
+}
+
+set_limit_args() {
+    __ARGS_LIMIT="$1"
 }
 
 # define a command-line argument
@@ -124,6 +129,7 @@ parse_args() {
     fi
 
     positional_idx=0
+    num_parsed=0
     while [[ $# -gt 0 ]]; do
         case "$1" in
             --)
@@ -134,10 +140,12 @@ parse_args() {
                 if [[ -n "${__ARGS_PROPERTIES[$key,help]}" ]]; then
                     if [[ "${__ARGS_PROPERTIES[$key,type]}" == "bool" ]]; then
                         declare -g "$key_var"="$key"
+                        num_parsed=$(( num_parsed + 1 ))
                         shift # past the flag argument
                     else
                         [[ -z "$2" || "$2" == --* ]] && die "missing value for argument $key"
                         declare -g "$key_var"="$2"
+                        num_parsed=$(( num_parsed + 2 ))
                         shift # past argument
                         shift # past value
                     fi
@@ -154,9 +162,14 @@ parse_args() {
                 else
                     die "expected at most ${#__ARGS_POSITIONAL[@]} positional arguments"
                 fi
+                num_parsed=$(( num_parsed + 1 ))
                 shift
                 ;;
         esac
+
+        if [[ "$__ARGS_LIMIT" -gt 0 && "$num_parsed" -eq "$__ARGS_LIMIT" ]]; then
+            break
+        fi
     done
 
     # Check for required arguments
@@ -253,6 +266,7 @@ check_builtin() {
         arg_bool "$__ARGS_COMPLETIONS_FLAG" "list options for auto-complete"
     fi
 
+    idx=0
     for arg in "$@"; do
         case "$arg" in
             --)
@@ -289,5 +303,9 @@ check_builtin() {
                 exit 0
                 ;;
         esac
+        idx=$(( idx + 1 ))
+        if [[ "$__ARGS_LIMIT" -gt 0 && "$idx" -eq "$__ARGS_LIMIT" ]]; then
+            break
+        fi
     done
 }
