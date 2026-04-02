@@ -255,6 +255,8 @@ check_builtin() {
 
     for arg in "$@"; do
         case "$arg" in
+            --)
+                break ;;
             -h|--help)
                 show_help; exit 0;
                 ;;
