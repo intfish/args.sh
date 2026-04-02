@@ -185,7 +185,7 @@ show_help() {
             fi
             printf "%s " "$arg_name"
         done
-        printf '\n'
+        printf '\n\n'
     fi
 
     if [[ -n "$HELP_DESCRIPTION" ]]; then
