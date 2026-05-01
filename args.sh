@@ -137,6 +137,12 @@ get_var_name() {
 # parse command-line arguments
 # usage: parse_args "$@"
 parse_args() {
+    # Show help if no arguments are supplied
+    if [[ -z "$@" ]]; then
+        show_help
+        exit 0
+    fi
+
     check_builtin "$@"
 
     if [ "$__ARGS_DUMP_ARGS" = true ]; then
