@@ -14,6 +14,7 @@ __ARGS_POS_PREFIX="arg"
 __ARGS_COMPLETIONS=""
 __ARGS_COMPLETIONS_FLAG="-L"
 __ARGS_LIMIT=0
+__ARGS_MIN=0
 
 __ARGS_HELP_DESCRIPTION=""
 __ARGS_HELP_COMMAND="$0"
@@ -32,6 +33,7 @@ args_reset() {
     __ARGS_COMPLETIONS=""
     __ARGS_COMPLETIONS_FLAG="-L"
     __ARGS_LIMIT=0
+    __ARGS_MIN=0
 
     __ARGS_HELP_DESCRIPTION=""
     __ARGS_HELP_COMMAND="$0"
@@ -71,6 +73,10 @@ set_limit_args() {
     __ARGS_LIMIT="$1"
 }
 
+set_min_args() {
+    __ARGS_MIN="$1"
+}
+
 # define a command-line argument
 # usage: define_arg "arg_name" ["default"] ["help text"] ["type"] ["required"] ["var_name"]
 define_arg() {
@@ -97,7 +103,7 @@ arg_bool() {
 }
 
 # define a positional argument
-# usage: arg_pos "arg_name" ["defult"] ["help text"] ["required"]
+# usage: arg_pos "arg_name" ["default"] ["help text"] ["required"]
 arg_pos() {
     define_arg "$1" "$2" "$3" "positional" "${4:-"optional"}" "$5"
 }
@@ -137,12 +143,6 @@ get_var_name() {
 # parse command-line arguments
 # usage: parse_args "$@"
 parse_args() {
-    # Show help if no arguments are supplied
-    if [[ -z "$@" ]]; then
-        show_help
-        exit 0
-    fi
-
     check_builtin "$@"
 
     if [ "$__ARGS_DUMP_ARGS" = true ]; then
@@ -289,6 +289,13 @@ show_help() {
 check_builtin() {
     if [[ -z "${__ARGS_PROPERTIES["$__ARGS_COMPLETIONS_FLAG",help]}" ]]; then
         arg_bool "$__ARGS_COMPLETIONS_FLAG" "list options for auto-complete"
+    fi
+
+    # show help if no arguments are supplied
+    if [[ -z "$@" && "$__ARGS_MIN" -gt 0 ]]; then
+        echo "__ARGS_MIN=$__ARGS_MIN"
+        show_help
+        exit 0
     fi
 
     idx=0
