@@ -293,7 +293,6 @@ check_builtin() {
 
     # show help if no arguments are supplied
     if [[ -z "$@" && "$__ARGS_MIN" -gt 0 ]]; then
-        echo "__ARGS_MIN=$__ARGS_MIN"
         show_help
         exit 0
     fi
