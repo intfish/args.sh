@@ -108,6 +108,12 @@ arg_pos() {
     define_arg "$1" "$2" "$3" "positional" "${4:-"optional"}" "$5"
 }
 
+# define a repeated flag (can be specified multiple times, values collected into array)
+# usage: arg_multi "arg_name" ["help text"] ["required"] ["var_name"]
+arg_multi() {
+    define_arg "$1" "" "${2:-""}" "multi" "${3:-"optional"}" "$4"
+}
+
 # display an error message and exit
 # usage: die "message"
 die() {
@@ -167,6 +173,16 @@ parse_args() {
                         declare -g "$key_var"="$key"
                         num_parsed=$(( num_parsed + 1 ))
                         shift # past the flag argument
+                    elif [[ "${__ARGS_PROPERTIES[$key,type]}" == "multi" ]]; then
+                        [[ -z "$2" || "$2" == --* ]] && die "missing value for argument $key"
+                        declare -n ref="$key_var"
+                        if [[ -z "${!key_var+set}" ]]; then
+                            declare -g -a ref=()
+                        fi
+                        ref+=("$2")
+                        num_parsed=$(( num_parsed + 2 ))
+                        shift # past argument
+                        shift # past value
                     else
                         [[ -z "$2" || "$2" == --* ]] && die "missing value for argument $key"
                         declare -g "$key_var"="$2"
@@ -241,7 +257,7 @@ show_help() {
     for key in "${!__ARGS_PROPERTIES[@]}"; do
         arg_name="${key%%,*}"
         len="${#arg_name}"
-        if [[ "${__ARGS_PROPERTIES[$arg_name,type]}" == "string" ]]; then
+        if [[ "${__ARGS_PROPERTIES[$arg_name,type]}" == "string" || "${__ARGS_PROPERTIES[$arg_name,type]}" == "multi" ]]; then
             len=$(( len + 8 )) # len(" <value>")
         fi
         max_len=$(( len > max_len ? len : max_len ))

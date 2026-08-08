@@ -25,6 +25,9 @@ arg_bool -1   "version 1" optional opt_version
 arg_bool -2   "version 2" optional opt_version
 arg_bool -3   "version 3" optional opt_version
 
+# multi-args
+arg_multi --dir "search paths (repeat for multiple)" optional opt_dirs
+
 # hidden options
 arg_bool -3.5   "version 3.5" hidden opt_version
 
@@ -36,6 +39,6 @@ parse_args "$@"
 echo "--verbose: $opt_verbose"
 echo "--key:     $opt_key"
 echo "version:   $opt_version"
+echo "dirs:      ${opt_dirs[@]}"
 echo "path:      $arg_path"
 echo "something: $arg_something"
-
