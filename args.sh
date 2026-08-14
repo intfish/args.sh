@@ -543,10 +543,16 @@ _args_is_option() {
     [[ "$1" == -* && ( "$1" != "-" || -n "${__ARGS_PROPERTIES[-,var]:-}" ) ]]
 }
 
+_args_consume() {
+    __ARGS_CONSUMED=$(( __ARGS_CONSUMED + $1 ))
+}
+
 # parse command-line arguments
 # usage: args_parse "$@"
 args_parse() {
     local __args_positional_idx=0 __args_num_parsed=0 __args_in_passthrough=false __args_consumed
+
+    __ARGS_CONSUMED=0
 
     _args_show_help_if_empty "$#" || return 1
     _args_dump_args
@@ -555,7 +561,7 @@ args_parse() {
         if [[ "$1" == "--" && $__args_in_passthrough == false ]]; then
             __args_in_passthrough=true
             shift
-            __ARGS_CONSUMED=$(( __ARGS_CONSUMED + 1 ))
+            _args_consume 1
             continue
         fi
 
@@ -563,7 +569,7 @@ args_parse() {
             _args_assign_positional "$1" __args_positional_idx || return 1
             __args_num_parsed=$(( __args_num_parsed + 1 ))
             shift
-            __ARGS_CONSUMED=$(( __ARGS_CONSUMED + 1 ))
+            _args_consume 1
             _args_break_if_limit "$__args_num_parsed" && break
             continue
         fi
@@ -571,7 +577,7 @@ args_parse() {
         if [[ -n "$__ARGS_COMPLETIONS_FLAG" && "$1" == "$__ARGS_COMPLETIONS_FLAG" \
                 && -z "${__ARGS_PROPERTIES[$__ARGS_COMPLETIONS_FLAG,var]+set}" ]]; then
             _args_print_completions
-            __ARGS_CONSUMED=$(( __ARGS_CONSUMED + 1 ))
+            _args_consume 1
             _args_terminate 0
             return 0
         fi
@@ -579,7 +585,7 @@ args_parse() {
         case "$1" in
             -h|--help|-h=*|--help=*)
                 args_show_help
-                __ARGS_CONSUMED=$(( __ARGS_CONSUMED + 1 ))
+                _args_consume 1
                 _args_terminate 0
                 return 0
                 ;;
@@ -593,7 +599,7 @@ args_parse() {
             _args_assign_positional "$1" __args_positional_idx || return 1
         fi
         shift "$__args_consumed"
-        __ARGS_CONSUMED=$(( __ARGS_CONSUMED + __args_consumed ))
+        _args_consume "$__args_consumed"
         __args_num_parsed=$(( __args_num_parsed + 1 ))
         _args_break_if_limit "$__args_num_parsed" && break
     done
