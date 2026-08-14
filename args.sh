@@ -272,6 +272,11 @@ arg_multi() {
     args_define "$1" "" "${2:-""}" "multi" "${3:-"optional"}" "${4:-}"
 }
 
+# true when the completions flag is enabled and not shadowed by a defined variable
+_args_completions_enabled() {
+    [[ -n "$__ARGS_COMPLETIONS_FLAG" && -z "${__ARGS_PROPERTIES[$__ARGS_COMPLETIONS_FLAG,var]+set}" ]]
+}
+
 # true if any option-like (non-positional, non-hidden) argument is defined or an
 # enabled completions flag is listed, i.e. the option section is non-empty
 _args_has_listed_options() {
@@ -282,8 +287,7 @@ _args_has_listed_options() {
             return 0
         fi
     done
-    [[ -n "$__ARGS_COMPLETIONS_FLAG" \
-        && -z "${__ARGS_PROPERTIES[$__ARGS_COMPLETIONS_FLAG,var]+set}" ]]
+    _args_completions_enabled
 }
 
 # displays help
@@ -360,8 +364,7 @@ args_show_help() {
             fi
         done
 
-        if [[ -n "$__ARGS_COMPLETIONS_FLAG" \
-                && -z "${__ARGS_PROPERTIES[$__ARGS_COMPLETIONS_FLAG,var]+set}" ]]; then
+        if _args_completions_enabled; then
             printf '    %-*s%s\n' "$__args_max_len" "$__ARGS_COMPLETIONS_FLAG" "list options for auto-complete"
         fi
     } | sort
@@ -581,8 +584,7 @@ args_parse() {
             continue
         fi
 
-        if [[ -n "$__ARGS_COMPLETIONS_FLAG" && "$1" == "$__ARGS_COMPLETIONS_FLAG" \
-                && -z "${__ARGS_PROPERTIES[$__ARGS_COMPLETIONS_FLAG,var]+set}" ]]; then
+        if _args_completions_enabled && [[ "$1" == "$__ARGS_COMPLETIONS_FLAG" ]]; then
             _args_print_completions
             _args_consume 1
             _args_terminate 0
