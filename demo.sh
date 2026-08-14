@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # shellcheck disable=SC2154 # args.sh assigns opt_* and arg_* variables
-SCRIPT_ROOT=$(cd "$(dirname "$0")"; pwd)
+SCRIPT_ROOT="$(cd "$(dirname "$0")" && pwd)"
 . "$SCRIPT_ROOT/args.sh"
 
 set -e

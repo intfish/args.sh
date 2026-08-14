@@ -6,7 +6,7 @@ Opinionated library for argument parsing for bash scripts.
 
 ```sh
 #!/usr/bin/env bash
-SCRIPT_ROOT=$(cd "$(dirname "$0")"; pwd)
+SCRIPT_ROOT="$(cd "$(dirname "$0")" && pwd)"
 . "$SCRIPT_ROOT/args.sh"
 
 set -e
@@ -54,7 +54,7 @@ See [demo.sh](./demo.sh) for more
 - `set_dump_args true` - debug: print the raw property table before parsing
 - `set_completions "static text"` - replacement for the completion list
 - `set_completions_flag "-L"` - the flag that triggers completions (default `-L`); accepts only option-like names, pass `""` to disable
-- `set_limit_args n` - stop parsing after n arguments (sub-parser support)
+- `set_limit_args n` - stop parsing after n logical arguments (sub-parser support)
   - `__ARGS_CONSUMED` holds the exact number of *tokens* consumed by the last `args_parse`; sub-parsers should `shift "$__ARGS_CONSUMED"` rather than `shift n`
 - `set_min_args n` - fails with an error if fewer than n arguments were consumed
 - `set_error_exit true|false` - when `false`, a parse error returns a non-zero status from the failing call instead of `exit`-ing
