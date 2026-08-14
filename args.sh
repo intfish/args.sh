@@ -123,7 +123,7 @@ set_min_args() {
 # script mode: exit with code
 # interactive-safe mode (set_error_exit false): returns code so callers can unwind instead
 _args_terminate() {
-    if $__ARGS_ERROR_EXIT || [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+    if [[ "$__ARGS_ERROR_EXIT" == true || "${BASH_SOURCE[0]}" == "$0" ]]; then
         exit "$1"
     fi
     return "$1"
@@ -161,6 +161,13 @@ args_convert_var_name() {
 # usage: args_define "arg_name" ["default"] ["help text"] ["type"] ["required"] ["var_name"]
 args_define() {
     local __args_arg_name=$1
+
+    # commas not allowed due to our "key,property" schema
+    case $__args_arg_name in
+        *,*)
+            args_die "argument '$__args_arg_name' contains a comma; it may not" || return 1
+            ;;
+    esac
 
     # arguments cannot be redefined; the existing registration is authoritative
     if [[ -n "${__ARGS_PROPERTIES[$__args_arg_name,type]+set}" ]]; then
